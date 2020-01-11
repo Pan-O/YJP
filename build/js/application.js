@@ -1,0 +1,247 @@
+//ajax评论发表
+jQuery(document).ready(function(jQuery) {
+	var __cancel = jQuery('#cancel-comment-reply-link'),
+		__cancel_text = __cancel.text(),
+		__list = 'comment-list';
+	jQuery(document).on("submit", "#commentform", function() {
+		jQuery.ajax({
+			url: J.ajax_url,
+			data: jQuery(this).serialize() + "&action=ajax_comment",
+			type: jQuery(this).attr('method'),
+			beforeSend: faAjax.createButterbar("提交中...."),
+			error: function(request) {
+				var t = faAjax;
+				t.createButterbar(request.responseText);
+			},
+			success: function(data) {
+				jQuery('textarea').each(function() {
+					this.value = ''
+				});
+				var t = faAjax,
+					cancel = t.I('cancel-comment-reply-link'),
+					temp = t.I('wp-temp-form-div'),
+					respond = t.I(t.respondId),
+					post = t.I('comment_post_ID').value,
+					parent = t.I('comment_parent').value;
+				if (parent != '0') {
+					jQuery('#respond').before('<ol class="children">' + data + '</ol>');
+				} else if (!jQuery('.' + __list ).length) {
+					if (J.formpostion == 'bottom') {
+						jQuery('#respond').before('<ol class="' + __list + '">' + data + '</ol>');
+					} else {
+						jQuery('#respond').after('<ol class="' + __list + '">' + data + '</ol>');
+					}
+
+				} else {
+					if (J.order == 'asc') {
+						jQuery('.' + __list ).append(data);
+					} else {
+						jQuery('.' + __list ).prepend(data); 
+					}
+				}
+				t.createButterbar("提交成功");
+				cancel.style.display = 'none';
+				cancel.onclick = null;
+				t.I('comment_parent').value = '0';
+				if (temp && respond) {
+					temp.parentNode.insertBefore(respond, temp);
+					temp.parentNode.removeChild(temp)
+				}
+			}
+		});
+		return false;
+	});
+	faAjax = {
+		I: function(e) {
+			return document.getElementById(e);
+		},
+		clearButterbar: function(e) {
+			if (jQuery(".ajax-message").length > 0) {
+				jQuery(".ajax-message").remove();
+			}
+		},
+		createButterbar: function(message) {
+			var t = this;
+			t.clearButterbar();
+			jQuery("body").append('<div class="ajax-message ajax-comment-center"><p class="ajax-message--main">' + message + '</p></div>');
+			setTimeout("jQuery('.ajax-message').remove()", 3000);
+		}
+	};
+});
+
+/**
+ 消息提示组件
+**/
+
+$.extend({
+  message: function(options) {
+      var defaults={
+          message:' 操作成功',
+          time:'2000',
+          showClose:false,
+          autoClose:true,
+          onClose:function(){}
+      };
+      
+      if(typeof options === 'string'){
+          defaults.message=options;
+      }
+      if(typeof options === 'object'){
+          defaults=$.extend({},defaults,options);
+      }
+      //message模版
+      var template='<div class="c-message messageFadeInDown">'+
+          '<div class="c-message--main">' +
+            '<div class="c-message--tip">'+defaults.message+'</div>'+
+          '</div>'+
+      '</div>';
+      var _this=this;
+      var $body=$('body');
+      var $message=$(template);
+      var timer;
+      var closeFn,removeFn;
+      //关闭
+      closeFn=function(){
+          $message.addClass('messageFadeOutUp');
+          $message.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend',function(){
+              removeFn();
+          })
+      };
+      //移除
+      removeFn=function(){
+          $message.remove();
+          defaults.onClose(defaults);
+          clearTimeout(timer);
+      };
+      //移除所有
+      $('.c-message').remove();
+      $body.append($message);
+      //居中
+      $message.css({
+          'margin-left':'-'+$message.width()/2+'px'
+      })
+      //去除动画类
+      $message.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend',function(){
+          $message.removeClass('messageFadeInDown');
+      });
+      //自动关闭
+      if(defaults.autoClose){
+          timer=setTimeout(function(){
+              closeFn();
+          },defaults.time)
+      }
+  }
+});
+//ajax加载文章
+  $("#pagination a").on("click", function(){
+    $(this).addClass("").text("加载中");
+    $('.cp-spinner').slideDown();
+    $.ajax({
+  type: "POST",
+      url: $(this).attr("href"),
+                 success: function(data){
+                        result = $(data).find(".main-content .post-item");
+                        nextHref = $(data).find("#pagination a").attr("href");
+                        $(".main-content").append(result.fadeIn(500));
+                        $("#pagination a").removeClass("loading").text("下一页");
+                        if ( nextHref != undefined ) {
+                            $("#pagination a").attr("href", nextHref);
+                        } else {
+                            $("#pagination").html("<span>没有了啊！</span>");
+                        }
+        
+      }
+    });
+    return false;
+  });
+//代码高亮
+hljs.initHighlightingOnLoad();
+//ajax评论分页
+ $body=(window.opera)?(document.compatMode=="CSS1Compat"?$('html'):$('body')):$('html,body');
+        $('body').on('click', '.comments-pagination a', function(e){
+            e.preventDefault();
+            $.ajax({
+                type: "GET",
+                url: $(this).attr('href'),
+                beforeSend: function(){
+                    $('.comments-pagination').remove();
+                    $('ol.comment-list').remove();
+                    $('#loading-comments').slideDown();
+                    $body.animate({
+											scrollTop: $('.comments-title').offset().top - 65
+										}, 800 );
+                },
+                dataType: "html",
+                success: function(out){
+                    result = $(out).find('ol.comment-list');
+                    nextlink = $(out).find('.comments-pagination');
+                    $('#loading-comments').slideUp('fast');
+                    $('#loading-comments').after(result.fadeIn(500));
+                    $('ol.comment-list').after(nextlink);
+                }
+            });
+        });
+
+
+//点赞
+$.fn.postLike = function() {
+	if ($(this).hasClass('done')) {
+		$.message('你已经赞过了！');
+		return false;
+	} else {
+	    $.message('点赞成功');
+		$(this).addClass('done');
+		var id = $(this).data("id"),
+		action = $(this).data('action'),
+		rateHolder = $(this).children('.count');
+		var ajax_data = {
+			action: "specs_zan",
+			um_id: id,
+			um_action: action
+		};
+		$.post("/wp-admin/admin-ajax.php", ajax_data,
+		function(data) {
+			$(rateHolder).html(data);
+		});
+		return false;
+	}
+};
+$(document).on("click", ".specsZan",
+	function() {
+		$(this).postLike();
+});
+//一言
+if (J.hitokoto == 'open') {
+    $(function () {
+        $.getJSON("https://v1.hitokoto.cn/", function(e) {
+            $('.home-info-container h4').html(e.hitokoto)
+            $('.author-field p').html(e.hitokoto)
+        });
+    });
+}
+//展开 / 收缩功能
+(function() {
+	$(function(){
+		$('.xHeading').on('click', function(event){
+			var $this = $(this);
+			$this.closest('.xControl').find('.xContent').slideToggle(300);
+			if ($this.closest('.xControl').hasClass('active')) {
+				$this.closest('.xControl').removeClass('active');
+			} else {
+				$this.closest('.xControl').addClass('active');
+			}
+			event.preventDefault();
+		});
+	});
+}());
+//返回顶部
+$(function(){
+        $(window).on("scroll", function() {
+		var t = $(this).scrollTop();
+		t>200?$(".back2top").addClass("is-active") : $(".back2top").removeClass("is-active")
+	}), $(document).on("click", ".back2top", function() {
+		$("html,body").animate({
+			scrollTop: 0
+		}, 800)
+	});
+});
