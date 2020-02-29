@@ -19,7 +19,98 @@ remove_action( 'load-themes.php', 'wp_update_themes' );		// 移除后台主题�
 remove_action( 'load-update.php', 'wp_update_themes' );
 remove_action( 'load-update-core.php', 'wp_update_themes' );
 remove_action( 'admin_init', '_maybe_update_themes' );
+//表情（来自wp-alu插件）
+add_filter('smilies_src', 'alu_smilies_src', 1, 10);
+function alu_smilies_src($img_src, $img, $siteurl) {
+    $img = rtrim($img, "gif");
+    return get_template_directory_uri() .'/build/img/alu/' . $img . 'gif';
+}
 
+
+function alu_get_wpsmiliestrans() {
+    global $wpsmiliestrans;
+    $wpsmilies = array_unique($wpsmiliestrans);
+    $output = '';
+    foreach ($wpsmilies as $alt => $src_path) {
+        //$emoji = str_replace(array('&#x', ';'), '', wp_encode_emoji($src_path));
+        $output .= '<a class="add-smily" data-action="addSmily" data-smilies="' . $alt . '"><img class="wp-smiley" src="'. get_template_directory_uri() .'/build/img/alu/' . $src_path .'" /></a>';
+    }
+    return $output;
+}
+
+function alu_smilies_reset() {
+    global $wpsmiliestrans, $wp_smiliessearch;
+
+// don't bother setting up smilies if they are disabled
+    if ( !get_option( 'use_smilies' ) )
+        return;
+
+    $wpsmiliestrans = array(
+        ':mrgreen:' => 'icon_mrgreen.gif',
+        ':neutral:' => 'icon_neutral.gif',
+        ':twisted:' => 'icon_twisted.gif',
+        ':arrow:' => 'icon_arrow.gif',
+        ':shock:' => 'icon_eek.gif',
+        ':smile:' => 'icon_smile.gif',
+        ':???:' => 'icon_confused.gif',
+        ':cool:' => 'icon_cool.gif',
+        ':evil:' => 'icon_evil.gif',
+        ':grin:' => 'icon_biggrin.gif',
+        ':idea:' => 'icon_idea.gif',
+        ':oops:' => 'icon_redface.gif',
+        ':razz:' => 'icon_razz.gif',
+        ':roll:' => 'icon_rolleyes.gif',
+        ':wink:' => 'icon_wink.gif',
+        ':cry:' => 'icon_cry.gif',
+        ':eek:' => 'icon_surprised.gif',
+        ':lol:' => 'icon_lol.gif',
+        ':mad:' => 'icon_mad.gif',
+        ':sad:' => 'icon_sad.gif',
+        '8-)' => 'icon_cool.gif',
+        '8-O' => 'icon_eek.gif',
+        ':-(' => 'icon_sad.gif',
+        ':-)' => 'icon_smile.gif',
+        ':-?' => 'icon_confused.gif',
+        ':-D' => 'icon_biggrin.gif',
+        ':-P' => 'icon_razz.gif',
+        ':-o' => 'icon_surprised.gif',
+        ':-x' => 'icon_mad.gif',
+        ':-|' => 'icon_neutral.gif',
+        ';-)' => 'icon_wink.gif',
+        // This one transformation breaks regular text with frequency.
+        //     '8)' => 'icon_cool.gif',
+        '8O' => 'icon_eek.gif',
+        ':(' => 'icon_sad.gif',
+        ':)' => 'icon_smile.gif',
+        ':?' => 'icon_confused.gif',
+        ':D' => 'icon_biggrin.gif',
+        ':P' => 'icon_razz.gif',
+        ':o' => 'icon_surprised.gif',
+        ':x' => 'icon_mad.gif',
+        ':|' => 'icon_neutral.gif',
+        ';)' => 'icon_wink.gif',
+        ':!:' => 'icon_exclaim.gif',
+        ':?:' => 'icon_question.gif',
+    );
+}
+add_action('init','alu_smilies_reset');
+
+
+add_filter( 'comment_form_defaults','alu_add_smilies_to_comment_form');
+function alu_add_smilies_to_comment_form($default) {
+    $commenter = wp_get_current_commenter();
+    $default['comment_field'] .= '<a class="comment-addsmilies" href="javascript:;"><i class="iconfont icon-smile"></i></a><span class="comment-form-smilies">' . alu_get_wpsmiliestrans() . '</span>';
+    return $default;
+}
+//下载按钮
+function download_button($atts,$content=null,$code=""){
+    extract(shortcode_atts(array(),$atts));
+    $return .= '<span class="download_button"><a href="'.$content.'">';
+    $return .= '<i class="iconfont icon-download"></i>Download';
+    $return .= '</a></span>';
+    return $return;
+}
+add_shortcode('download','download_button');
 //代码高亮
 function highlight_code($atts,$content=null,$code=""){
     extract(shortcode_atts(array(),$atts));
@@ -250,21 +341,20 @@ function jaguar_scripts_styles() {
      if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
             wp_enqueue_script( 'comment-reply' );
         }
-    wp_enqueue_style( 'jaguar', get_template_directory_uri() . '/build/css/app.css', array(), '1.0' );
-    wp_enqueue_style( 'iconfont', get_template_directory_uri() . '/build/css/iconfont.css', array(), '1.0' );
+    wp_enqueue_style( 'jaguar', get_template_directory_uri() . '/build/css/app.css', array(), '1.2' );
+    wp_enqueue_style( 'iconfont', get_template_directory_uri() . '/build/css/iconfont.css', array(), '1.2' );
     if ( is_singular() ) {
     wp_enqueue_style( 'highlight', get_template_directory_uri() . '/build/css/highlight.css', array(), '9.15.10' );
  wp_enqueue_script( 'highlight' , get_template_directory_uri() . '/build/js/highlight.min.js' , array() , '9.15.10' ,true);
     }
+ wp_enqueue_script( 'qrcode' , get_template_directory_uri() . '/build/js/qrcode.min.js' , array() , '' ,true);
  wp_enqueue_script( 'jaguar_jquery' , get_template_directory_uri() . '/build/js/jquery.min.js' , array() , '3.4.1' ,true);
-    wp_enqueue_script( 'jaguar' , get_template_directory_uri() . '/build/js/application.js' , array('jquery') , '1.0' ,true);
+    wp_enqueue_script( 'jaguar' , get_template_directory_uri() . '/build/js/application.js' , array('jquery') , '1.2' ,true);
    wp_localize_script( 'jaguar', 'J', array(
             'ajax_url'   => admin_url('admin-ajax.php'),
             'order' => get_option('comment_order'),
             'formpostion' => 'bottom', 
-            'hitokoto' => yjp_option('hitokoto') ? 'open' : 'close',
         ) );
-        
     if ( is_singular() && has_post_thumbnail() ) {
 
         global $post;

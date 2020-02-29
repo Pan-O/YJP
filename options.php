@@ -179,6 +179,106 @@ function optionsframework_options() {
         'type' => 'checkbox'
     );
     
+    $options[] = array(
+        'name' => __('分享功能', 'theme-textdomain'),
+        'desc' => __('默认关闭，勾选开启', 'theme-textdomain'),
+        'id' => 'share',
+        'std' => '0',
+        'type' => 'checkbox'
+    );
+    
+     $options[] = array(
+        'name' => __('打赏功能', 'theme-textdomain'),
+        'desc' => __('默认关闭，勾选开启', 'theme-textdomain'),
+        'id' => 'reward',
+        'std' => '0',
+        'type' => 'checkbox'
+    );
+    
+    $options[] = array(
+		'name' => __('打赏二维码', 'theme-textdomain'),
+		'desc' => __('注意图片大小', 'theme-textdomain'),
+		'id' => 'reward_img',
+		'type' => 'upload'
+	);
+    
+    $options[] = array(
+		'name' => __( '社交', 'theme-textdomain' ),
+		'type' => 'heading'
+	);
+	
+	 $options[] = array(
+        'name' => __('个人链接', 'theme-textdomain'),
+        'desc' => __('默认关闭，勾选开启，会在首页显示你所添加的链接', 'theme-textdomain'),
+        'id' => 'blogger-link',
+        'std' => '0',
+        'type' => 'checkbox'
+    );
+	
+	$options[] = array(
+	'name' => __('微信', 'theme-textdomain'),
+	'desc' => __('上传微信二维码，注意图片大小', 'theme-textdomain'),
+	'id' => 'wechat_img',
+	'type' => 'upload'
+	);
+
+	
+	$options[] = array(
+		'name' => __('微博', 'theme-textdomain'),
+		'desc' => __('填写你的新浪微博地址', 'theme-textdomain'),
+		'id' => 'weibo_link',
+		'type' => 'text'
+	);
+	
+	$options[] = array(
+		'name' => __('bilibili', 'theme-textdomain'),
+		'desc' => __('填写你的bilibili地址', 'theme-textdomain'),
+		'id' => 'bilibili_link',
+		'type' => 'text'
+	);
+    
+	$options[] = array(
+		'name' => __('Facebook', 'theme-textdomain'),
+		'desc' => __('填写你的Facebook地址', 'theme-textdomain'),
+		'id' => 'facebook_link',
+		'type' => 'text'
+	);
+	
+	$options[] = array(
+		'name' => __('网易云音乐', 'theme-textdomain'),
+		'desc' => __('填写你的网易云音乐地址', 'theme-textdomain'),
+		'id' => 'netease_cloud_music_link',
+		'type' => 'text'
+	);
+	
+    $options[] = array(
+		'name' => __('知乎', 'theme-textdomain'),
+		'desc' => __('填写你的知乎地址', 'theme-textdomain'),
+		'id' => 'zhihu_link',
+		'type' => 'text'
+	);
+	
+	 $options[] = array(
+		'name' => __('酷安', 'theme-textdomain'),
+		'desc' => __('填写你的酷安地址', 'theme-textdomain'),
+		'id' => 'coolapk_link',
+		'type' => 'text'
+	);
+	
+	$options[] = array(
+		'name' => __('qq', 'theme-textdomain'),
+		'desc' => __('填写你的qq账号', 'theme-textdomain'),
+		'id' => 'qq_numaber',
+		'type' => 'text'
+	);
+	
+	$options[] = array(
+		'name' => __('twitter', 'theme-textdomain'),
+		'desc' => __('填写你的twitter地址', 'theme-textdomain'),
+		'id' => 'twitter_link',
+		'type' => 'text'
+	);
+	
     	$options[] = array(
 		'name' => __( '其他设置', 'theme-textdomain' ),
 		'type' => 'heading'

@@ -11,14 +11,14 @@
     <?php wp_head(); ?>
     <style>
     .banner-mask{background-image: url(<?php echo yjp_option('home_banner'); ?>)}
-.cute,.post-like,#submit:hover,#pagination a:hover,.mask-wrapper .post-title:hover,.comment .fn,.comment-form .required,.comment-at,.post-navigation .nav-next a:hover .post-title,.post-navigation .nav-previous a:hover .post-title {color: <?php echo yjp_option('theme_color'); ?>}
+.cute,.post-like,#submit:hover,#pagination a:hover,.mask-wrapper .post-title:hover,.comment .fn,.comment-form .required,.comment-at,.post-navigation .nav-next a:hover .post-title,.post-navigation .nav-previous a:hover .post-title ,.share_button i{color: <?php echo yjp_option('theme_color'); ?>}
 #submit:hover {border-color: <?php echo yjp_option('theme_color'); ?>;}
-.loading span,.nav-links .page-numbers.current,.nav-links .page-numbers:hover,.comment-body .reply .comment-reply-link,.searchform input[type=submit] {background-color: <?php echo yjp_option('theme_color'); ?>}
+.loading span,.nav-links .page-numbers.current,.nav-links .page-numbers:hover,.comment-body .reply .comment-reply-link,.download_button,.searchform input[type=submit] {background-color: <?php echo yjp_option('theme_color'); ?>}
 #pagination a:hover{border:2px solid <?php echo yjp_option('theme_color'); ?>;}
 .searchform input[type=submit] {border: 1px solid <?php echo yjp_option('theme_color'); ?>;}
 </style>
 </head>
-<body <?php body_class(); ?>>
+<body <?php body_class(($_COOKIE['night'] == '1' ? 'night' : '') ); ?>">
 <div id="page" class="hfeed site">
     <header id="header" class="home-header blog-background banner-mask">
         <div class="nav-header container">       
@@ -35,7 +35,7 @@
                         <div class="post-info-container">
                             <h2 class="post-page-title "><?php the_title();?></h2>
                             <i class="iconfont icon-clock"></i><time class="post-page-time"><?php echo get_the_date('M d,Y');?></time><span class="middotDivider"></span>
-                            <span class="post-page-author"><i class="iconfont icon-account-outline"></i><a href="<?php echo get_author_posts_url($post->post_author);?>"><?php echo get_user_meta($post->post_author,'nickname',true);?></a></span>
+                            <span class="post-page-author"><i class="iconfont icon-account"></i><a href="<?php echo get_author_posts_url($post->post_author);?>"><?php echo get_user_meta($post->post_author,'nickname',true);?></a></span>
                             <span class="middotDivider"></span><i class="iconfont icon-eye"></i><span class="post-page-views"><?php echo get_post_views(get_the_ID()); ?></span>
                         </div>
                     </div>
@@ -52,7 +52,12 @@
                     <a href="/">
                         <h2><?php echo yjp_option('web_name'); ?></h2>
                     </a>
+                    <?php if ( yjp_option('hitokoto') == '0') : ?>
                     <h4><?php echo yjp_option('home_description'); ?></h4>
+                    <?php elseif ( yjp_option('hitokoto') == '1') : ?>
+                    <h4 id="hitokoto">:D 获取中...</h4>
+                    <?php endif; ?>
+                    <?php if ( yjp_option('blogger-link') == '1') { ?><div class="blogger_link"><?php if (yjp_option('qq_numaber')){ ?><a href="//wpa.qq.com/msgrd?v=3&uin=<?php echo yjp_option('qq_numaber'); ?>&site=qq&menu=yes" target="_blank"><i class="iconfont icon-QQ1"></i></a><?php } ?><?php if (yjp_option('netease_cloud_music_link')){ ?><a href="<?php echo yjp_option('netease_cloud_music_link'); ?>" target="_blank"><i class="iconfont icon-netease-cloud-music"></i></a><?php } ?><?php if (yjp_option('wechat_img')){ ?><span class="link_wechat"><a><i class="iconfont icon-wechat"></i><p class="link_wechat_content"><img src="<?php echo yjp_option('wechat_img'); ?>"></p></a></span><?php } ?><?php if (yjp_option('weibo_link')){ ?><a href="<?php echo yjp_option('weibo_link'); ?>" target="_blank"><i class="iconfont icon-weibo1"></i></a><?php } ?><?php if (yjp_option('coolapk_link')){ ?><a href="<?php echo yjp_option('coolapk_link'); ?>" target="_blank"><i class="iconfont icon-coolapk"></i></a><?php } ?><?php if (yjp_option('zhihu_link')){ ?><a href="<?php echo yjp_option('zhihu_link'); ?>" target="_blank"><i class="iconfont icon-zhihu"></i></a><?php } ?><?php if (yjp_option('bilibili_link')){ ?><a href="<?php echo yjp_option('bilibili_link'); ?>" target="_blank"><i class="iconfont icon-bilibili"></i></a><?php } ?><?php if (yjp_option('facebook_link')){ ?><a href="<?php echo yjp_option('facebook_link'); ?>" target="_blank"><i class="iconfont icon-facebook1"></i></a><?php } ?><?php if (yjp_option('twitter_link')){ ?><a href="<?php echo yjp_option('twitter_link'); ?>" target="_blank"><i class="iconfont icon-twitter"></i></a><?php } ?></div><?php } ?>
                 </div>
             </div>
         </div>

@@ -6,7 +6,7 @@ if ( post_password_required() )
 <div id="comments" class="comments-area">
     <?php if ( have_comments() ) : ?>
         <h2 class="comments-title">
-            <i class="iconfont icon-comment-multiple-outline"></i><?php echo number_format_i18n( get_comments_number() );?> 条评论
+            <i class="iconfont icon-comments"></i><?php echo number_format_i18n( get_comments_number() );?> 条评论
         </h2>
         <div id="loading-comments"><div class="loading"><span></span><span></span><span></span><span></span><span></span></div></div>
         

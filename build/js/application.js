@@ -1,3 +1,12 @@
+
+//一言
+   fetch('https://v1.hitokoto.cn')
+    .then(response => response.json())
+    .then(data => {
+      const hitokoto = document.getElementById('hitokoto');
+      hitokoto.innerText = data.hitokoto;
+    })
+    .catch(err => console.error(err));
 //ajax评论发表
 jQuery(document).ready(function(jQuery) {
 	var __cancel = jQuery('#cancel-comment-reply-link'),
@@ -69,6 +78,13 @@ jQuery(document).ready(function(jQuery) {
 	};
 });
 
+
+
+
+
+
+
+
 /**
  消息提示组件
 **/
@@ -132,6 +148,72 @@ $.extend({
       }
   }
 });
+//二维码
+var qrcode = new QRCode(document.getElementById("wechat_share_qrcode"), {
+	text:  window.location.href,
+	width: 128,
+	height: 128,
+	colorDark : "#000000",
+	colorLight : "#ffffff",
+	correctLevel : QRCode.CorrectLevel.H
+});
+
+//夜间模式
+function NightMode(){
+    var night = document.cookie.replace(/(?:(?:^|.*;\s*)night\s*\=\s*([^;]*).*$)|^.*$/, "$1") || '0';
+    if(night == '0'){
+        document.body.classList.add('night');
+        document.cookie = "night=1;path=/"
+		$.message('夜间模式开启');
+    }else{
+        document.body.classList.remove('night');
+        document.cookie = "night=0;path=/"
+		$.message('夜间模式关闭');
+    }
+}
+//表情（来自wp-alu插件）
+document.addEventListener('DOMContentLoaded', function(){
+   var aluContainer = document.querySelector('.comment-form-smilies');
+    if ( !aluContainer ) return;
+    aluContainer.addEventListener('click',function(e){
+    var myField,
+        _self = e.target.dataset.smilies ? e.target : e.target.parentNode;
+        if ( typeof _self.dataset.smilies == 'undefined' ) return;
+        var tag = ' ' + _self.dataset.smilies + ' ';
+        if (document.getElementById('comment') && document.getElementById('comment').type == 'textarea') {
+            myField = document.getElementById('comment')
+        } else {
+            return false
+        }
+        if (document.selection) {
+            myField.focus();
+            sel = document.selection.createRange();
+            sel.text = tag;
+            myField.focus()
+        } else if (myField.selectionStart || myField.selectionStart == '0') {
+            var startPos = myField.selectionStart;
+            var endPos = myField.selectionEnd;
+            var cursorPos = endPos;
+            myField.value = myField.value.substring(0, startPos) + tag + myField.value.substring(endPos, myField.value.length);
+            cursorPos += tag.length;
+            myField.focus();
+            myField.selectionStart = cursorPos;
+            myField.selectionEnd = cursorPos
+        } else {
+            myField.value += tag;
+            myField.focus()
+        }
+    });
+ });
+$('body').on('click','.comment-addsmilies',
+function(){
+    $('.comment-form-smilies').fadeToggle(400);
+});
+//分享
+$('body').on('click','.share_button',
+function(){
+    $('.share_show').fadeToggle(400);
+});
 //ajax加载文章
   $("#pagination a").on("click", function(){
     $(this).addClass("").text("加载中");
@@ -154,8 +236,6 @@ $.extend({
     });
     return false;
   });
-//代码高亮
-hljs.initHighlightingOnLoad();
 //ajax评论分页
  $body=(window.opera)?(document.compatMode=="CSS1Compat"?$('html'):$('body')):$('html,body');
         $('body').on('click', '.comments-pagination a', function(e){
@@ -210,15 +290,8 @@ $(document).on("click", ".specsZan",
 	function() {
 		$(this).postLike();
 });
-//一言
-if (J.hitokoto == 'open') {
-    $(function () {
-        $.getJSON("https://v1.hitokoto.cn/", function(e) {
-            $('.home-info-container h4').html(e.hitokoto)
-            $('.author-field p').html(e.hitokoto)
-        });
-    });
-}
+//代码高亮
+hljs.initHighlightingOnLoad();
 //展开 / 收缩功能
 (function() {
 	$(function(){
