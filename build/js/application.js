@@ -148,15 +148,6 @@ $.extend({
       }
   }
 });
-//二维码
-var qrcode = new QRCode(document.getElementById("wechat_share_qrcode"), {
-	text:  window.location.href,
-	width: 128,
-	height: 128,
-	colorDark : "#000000",
-	colorLight : "#ffffff",
-	correctLevel : QRCode.CorrectLevel.H
-});
 
 //夜间模式
 function NightMode(){
@@ -317,4 +308,16 @@ $(function(){
 			scrollTop: 0
 		}, 800)
 	});
+});
+//二维码
+$(function(){
+	var home = window.location.href;
+var qrcode = new QRCode("wechat_share_qrcode", {
+	text:  home,
+	width: 128,
+	height: 128,
+	colorDark : "#000000",
+	colorLight : "#ffffff",
+	correctLevel : QRCode.CorrectLevel.H
+});
 });

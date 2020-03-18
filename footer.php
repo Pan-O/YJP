@@ -24,6 +24,7 @@
 setInterval(function () {
     $('#run_time').html(runTime())
 }, 1000);</script><?php } ?>
+<?php echo yjp_option('footer_main'); ?>
         </footer>
     </div>
     <a href="javascript:NightMode()" target="_self" id="night-button"><i class="iconfont icon-night_light"></i></a>

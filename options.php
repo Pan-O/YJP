@@ -158,6 +158,13 @@ function optionsframework_options() {
         'type' => 'checkbox'
     );
     
+    $options[] = array(
+		'name' => __('自定义底部文字', 'theme-textdomain'),
+		'desc' => __('例如备案号，又拍云••••••', 'theme-textdomain'),
+		'id' => 'footer_main', 
+		'type' => 'textarea'
+	);
+    
     	$options[] = array(
 		'name' => __( '文章设置', 'theme-textdomain' ),
 		'type' => 'heading'
@@ -279,9 +286,23 @@ function optionsframework_options() {
 		'type' => 'text'
 	);
 	
+	$options[] = array(
+		'name' => __('telegram', 'theme-textdomain'),
+		'desc' => __('填写你的telegram地址', 'theme-textdomain'),
+		'id' => 'telegram_link',
+		'type' => 'text'
+	);
+	
     	$options[] = array(
 		'name' => __( '其他设置', 'theme-textdomain' ),
 		'type' => 'heading'
+	);
+	
+	$options[] = array(
+		'name' => __('邮箱地址前缀', 'theme-textdomain'),
+		'desc' => __('用于发送系统邮件，在用户的邮箱中显示的发件人地址，默认为email', 'theme-textdomain'),
+		'id' => 'mail_name',
+		'type' => 'text'
 	);
 	
 	$options[] = array(
@@ -299,5 +320,12 @@ function optionsframework_options() {
 		'type' => 'text'
 	);
 	
+		$options[] = array(
+        'name' => __('评论表情', 'theme-textdomain'),
+        'desc' => __('默认关闭，勾选开启', 'theme-textdomain'),
+        'id' => 'comment_smile',
+        'std' => '0',
+        'type' => 'checkbox'
+    );
 	return $options;
 }

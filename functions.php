@@ -96,12 +96,7 @@ function alu_smilies_reset() {
 add_action('init','alu_smilies_reset');
 
 
-add_filter( 'comment_form_defaults','alu_add_smilies_to_comment_form');
-function alu_add_smilies_to_comment_form($default) {
-    $commenter = wp_get_current_commenter();
-    $default['comment_field'] .= '<a class="comment-addsmilies" href="javascript:;"><i class="iconfont icon-smile"></i></a><span class="comment-form-smilies">' . alu_get_wpsmiliestrans() . '</span>';
-    return $default;
-}
+
 //下载按钮
 function download_button($atts,$content=null,$code=""){
     extract(shortcode_atts(array(),$atts));
@@ -158,12 +153,13 @@ function get_post_views($post_id)
 }
 //评论回复邮件通知
 function fanly_comment_mail_notify($comment_id) {
+$mail_name = yjp_option('mail_name') ? yjp_option('mail_name') : 'email'; 
 	$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
 	$comment = get_comment($comment_id);
 	$parent_id = $comment->comment_parent ? $comment->comment_parent : '';
 	$spam_confirmed = $comment->comment_approved;
 	if (($parent_id != '') && ($spam_confirmed != 'spam')) {
-		$wp_email = 'no-reply@' . preg_replace('#^www\.#', '', strtolower($_SERVER['SERVER_NAME']));
+		$wp_email = $mail_name .'@' . preg_replace('#^www\.#', '', strtolower($_SERVER['SERVER_NAME']));
 		$to = trim(get_comment($parent_id)->comment_author_email);
 		$subject = trim(get_comment($parent_id)->comment_author) . ',您在 [' . $blogname . '] 中的留言有新的回复啦！';
 		$message = '<div style="color:#555;font:12px/1.5 微软雅黑,Tahoma,Helvetica,Arial,sans-serif;max-width:550px;margin:50px auto;border-top: none;" ><table border="0" cellspacing="0" cellpadding="0"><tbody><tr valign="top" height="2"><td valign="top"><div style="background-color:white;max-width:550px;color:#555555;font-family:微软雅黑, Arial;font-size:12px;border: 1px solid rgba(0,0,0,.14);border-radius:10px;">
@@ -245,9 +241,10 @@ function jaguar_is_has_image($post_id){
 //杂项
 function jaguar_setup() {
     add_theme_support( 'post-thumbnails' );
+	add_theme_support( 'post-formats', array('status') );
     register_nav_menu( 'top' , '顶部菜单' );
+    add_filter('pre_option_link_manager_enabled','__return_true');
 }
-
 add_action( 'after_setup_theme', 'jaguar_setup' );
 //网站标题
 function jaguar_wp_title( $title, $sep ) {
@@ -341,15 +338,15 @@ function jaguar_scripts_styles() {
      if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
             wp_enqueue_script( 'comment-reply' );
         }
-    wp_enqueue_style( 'jaguar', get_template_directory_uri() . '/build/css/app.css', array(), '1.2' );
-    wp_enqueue_style( 'iconfont', get_template_directory_uri() . '/build/css/iconfont.css', array(), '1.2' );
+    wp_enqueue_style( 'jaguar', get_template_directory_uri() . '/build/css/app.css', array(), '1.3' );
+    wp_enqueue_style( 'iconfont', get_template_directory_uri() . '/build/css/iconfont.css', array(), '1.3' );
     if ( is_singular() ) {
     wp_enqueue_style( 'highlight', get_template_directory_uri() . '/build/css/highlight.css', array(), '9.15.10' );
  wp_enqueue_script( 'highlight' , get_template_directory_uri() . '/build/js/highlight.min.js' , array() , '9.15.10' ,true);
     }
  wp_enqueue_script( 'qrcode' , get_template_directory_uri() . '/build/js/qrcode.min.js' , array() , '' ,true);
  wp_enqueue_script( 'jaguar_jquery' , get_template_directory_uri() . '/build/js/jquery.min.js' , array() , '3.4.1' ,true);
-    wp_enqueue_script( 'jaguar' , get_template_directory_uri() . '/build/js/application.js' , array('jquery') , '1.2' ,true);
+    wp_enqueue_script( 'jaguar' , get_template_directory_uri() . '/build/js/application.js' , array('jquery') , '1.3' ,true);
    wp_localize_script( 'jaguar', 'J', array(
             'ajax_url'   => admin_url('admin-ajax.php'),
             'order' => get_option('comment_order'),
@@ -417,7 +414,7 @@ add_action('wp_ajax_ajax_comment', 'fa_ajax_comment_callback');
 //回复评论加@ 
 function wp_comment_add_at( $comment_text, $comment = '') {
 if( $comment->comment_parent > 0) {
-$comment_text = '<a href="#comment-' . $comment->comment_parent . '" class="comment-at">@'.get_comment_author( $comment->comment_parent ) . '</a>' . $comment_text;
+$comment_text = '<a href="#comment-' . $comment->comment_parent . '" class="comment-at">@'.get_comment_author( $comment->comment_parent ) . ' </a>' . $comment_text;
 }
 return $comment_text;
 }
