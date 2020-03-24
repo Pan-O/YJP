@@ -27,8 +27,9 @@ if ( post_password_required() )
         ) );?>
     <?php endif; ?>
    <?php if (yjp_option('comment_smile') == '1') {  ?> <?php $smile = '<a class="comment-addsmilies" href="javascript:;"><i class="iconfont icon-smile"></i></a><span class="comment-form-smilies">' . alu_get_wpsmiliestrans() . '</span>'; ?><?php } ?>
-    <?php comment_form(array(  
-    	 'comment_field' => '<p class="comment-form-comment"><label for="comment">' . _x( 'Comment', 'noun' ) . '</label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>'.$smile.'') ); ?>
+    <?php if (yjp_option('comment_img') == '1') {  ?><?php $comment_img ='<a id="comment_add_img"><i class="iconfont icon-photo_upload"></i></a>'; ?><?php } ?>
+  <?php comment_form(array(  
+    	 'comment_field' => '<p class="comment-form-comment"><label for="comment">' . _x( 'Comment', 'noun' ) . '</label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>'.$comment_img.' '.$smile.'') ); ?>
     
     
     

@@ -19,14 +19,42 @@ remove_action( 'load-themes.php', 'wp_update_themes' );		// 移除后台主题�
 remove_action( 'load-update.php', 'wp_update_themes' );
 remove_action( 'load-update-core.php', 'wp_update_themes' );
 remove_action( 'admin_init', '_maybe_update_themes' );
+//评论图片转换
+define('ALLOW_POSTS', '');
+function fa_comment_image( $comment ) {
+    $post_ID = $comment["comment_post_ID"];
+    $allow_posts = ALLOW_POSTS ? explode(',', ALLOW_POSTS) : array();
+    if(in_array($post_ID,$allow_posts) || empty($allow_posts) ){
+        global $allowedtags;
+        $content = $comment["comment_content"];
+        $content = preg_replace('/(https?:\/\/\S+\.(?:jpg|png|jpeg|gif))+/','<img src="$0" alt="" />',$content);
+        $allowedtags['img'] = array('src' => array (), 'alt' => array ());
+        $comment["comment_content"] = $content;
+    }
+    return $comment;
+}
+add_filter('preprocess_comment', 'fa_comment_image');
+// 去除WP版本号
+function remove_wp_version(){
+  return '';
+}
+add_filter('the_generator', 'remove_wp_version');
+function remove_wpversion($src){
+global $wp_version;
+ parse_str(parse_url($src, PHP_URL_QUERY), $query);
+ if ( !empty($query['ver']) && $query['ver'] === $wp_version ) {
+$src = str_replace($wp_version, 1.4, $src);
+  }
+ return $src;
+}
+add_filter('script_loader_src', 'remove_wpversion');
+add_filter('style_loader_src', 'remove_wpversion');
 //表情（来自wp-alu插件）
-add_filter('smilies_src', 'alu_smilies_src', 1, 10);
+add_filter('smilies_src', 'alu_smilies_src', 1, 10); 
 function alu_smilies_src($img_src, $img, $siteurl) {
     $img = rtrim($img, "gif");
     return get_template_directory_uri() .'/build/img/alu/' . $img . 'gif';
 }
-
-
 function alu_get_wpsmiliestrans() {
     global $wpsmiliestrans;
     $wpsmilies = array_unique($wpsmiliestrans);
@@ -37,14 +65,11 @@ function alu_get_wpsmiliestrans() {
     }
     return $output;
 }
-
 function alu_smilies_reset() {
     global $wpsmiliestrans, $wp_smiliessearch;
-
 // don't bother setting up smilies if they are disabled
     if ( !get_option( 'use_smilies' ) )
         return;
-
     $wpsmiliestrans = array(
         ':mrgreen:' => 'icon_mrgreen.gif',
         ':neutral:' => 'icon_neutral.gif',
@@ -94,9 +119,6 @@ function alu_smilies_reset() {
     );
 }
 add_action('init','alu_smilies_reset');
-
-
-
 //下载按钮
 function download_button($atts,$content=null,$code=""){
     extract(shortcode_atts(array(),$atts));
@@ -115,7 +137,6 @@ function highlight_code($atts,$content=null,$code=""){
     return $return;
 }
 add_shortcode('code','highlight_code');
-
 //浏览次数
 function restyle_text($number)
 {
@@ -338,15 +359,15 @@ function jaguar_scripts_styles() {
      if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
             wp_enqueue_script( 'comment-reply' );
         }
-    wp_enqueue_style( 'jaguar', get_template_directory_uri() . '/build/css/app.css', array(), '1.3' );
-    wp_enqueue_style( 'iconfont', get_template_directory_uri() . '/build/css/iconfont.css', array(), '1.3' );
+    wp_enqueue_style( 'jaguar', get_template_directory_uri() . '/build/css/app.css', array(), '1.4' );
+    wp_enqueue_style( 'iconfont', get_template_directory_uri() . '/build/css/iconfont.css', array(), '1.4' );
     if ( is_singular() ) {
     wp_enqueue_style( 'highlight', get_template_directory_uri() . '/build/css/highlight.css', array(), '9.15.10' );
  wp_enqueue_script( 'highlight' , get_template_directory_uri() . '/build/js/highlight.min.js' , array() , '9.15.10' ,true);
     }
  wp_enqueue_script( 'qrcode' , get_template_directory_uri() . '/build/js/qrcode.min.js' , array() , '' ,true);
  wp_enqueue_script( 'jaguar_jquery' , get_template_directory_uri() . '/build/js/jquery.min.js' , array() , '3.4.1' ,true);
-    wp_enqueue_script( 'jaguar' , get_template_directory_uri() . '/build/js/application.js' , array('jquery') , '1.3' ,true);
+    wp_enqueue_script( 'jaguar' , get_template_directory_uri() . '/build/js/application.js' , array('jquery') , '1.4' ,true);
    wp_localize_script( 'jaguar', 'J', array(
             'ajax_url'   => admin_url('admin-ajax.php'),
             'order' => get_option('comment_order'),

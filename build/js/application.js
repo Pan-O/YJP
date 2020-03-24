@@ -1,4 +1,3 @@
-
 //一言
    fetch('https://v1.hitokoto.cn')
     .then(response => response.json())
@@ -162,6 +161,21 @@ function NightMode(){
 		$.message('夜间模式关闭');
     }
 }
+//评论图片
+$(function(){
+var commentaddimgtextarea=document.getElementById('comment')
+var commentaddimg=document.getElementById('comment_add_img')
+commentaddimg.addEventListener('click', () => {
+  var value = commentaddimgtextarea.value.split('')
+  var pos = commentaddimgtextarea.selectionStart
+  var img = prompt("输入图片链接","");
+  var insertValue = img
+  value.splice(pos, 0, insertValue)
+  commentaddimgtextarea.value = value.join('')
+  commentaddimgtextarea.selectionStart = commentaddimgtextarea.selectionEnd = pos + insertValue.length
+  commentaddimgtextarea.focus()
+}, false)
+});
 //表情（来自wp-alu插件）
 document.addEventListener('DOMContentLoaded', function(){
    var aluContainer = document.querySelector('.comment-form-smilies');

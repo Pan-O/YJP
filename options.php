@@ -208,7 +208,32 @@ function optionsframework_options() {
 		'id' => 'reward_img',
 		'type' => 'upload'
 	);
-    
+
+
+
+    	$options[] = array(
+		'name' => __( '评论设置', 'theme-textdomain' ),
+		'type' => 'heading'
+	);
+		$options[] = array(
+        'name' => __('评论表情', 'theme-textdomain'),
+        'desc' => __('默认关闭，勾选开启', 'theme-textdomain'),
+        'id' => 'comment_smile',
+        'std' => '0',
+        'type' => 'checkbox'
+    );
+
+
+		$options[] = array(
+        'name' => __('评论图片', 'theme-textdomain'),
+        'desc' => __('默认关闭，勾选开启', 'theme-textdomain'),
+        'id' => 'comment_img',
+        'std' => '0',
+        'type' => 'checkbox'
+    );
+
+
+
     $options[] = array(
 		'name' => __( '社交', 'theme-textdomain' ),
 		'type' => 'heading'
@@ -292,6 +317,14 @@ function optionsframework_options() {
 		'id' => 'telegram_link',
 		'type' => 'text'
 	);
+
+
+	$options[] = array(
+		'name' => __('电子邮箱', 'theme-textdomain'),
+		'desc' => __('填写你的邮箱', 'theme-textdomain'),
+		'id' => 'link_email',
+		'type' => 'text'
+	);
 	
     	$options[] = array(
 		'name' => __( '其他设置', 'theme-textdomain' ),
@@ -320,12 +353,5 @@ function optionsframework_options() {
 		'type' => 'text'
 	);
 	
-		$options[] = array(
-        'name' => __('评论表情', 'theme-textdomain'),
-        'desc' => __('默认关闭，勾选开启', 'theme-textdomain'),
-        'id' => 'comment_smile',
-        'std' => '0',
-        'type' => 'checkbox'
-    );
 	return $options;
 }
