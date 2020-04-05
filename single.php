@@ -19,8 +19,7 @@
                     <?php if ( yjp_option('hitokoto') == '0') : ?>
                     <p><?php echo yjp_option('home_description'); ?></p>
                     <?php elseif ( yjp_option('hitokoto') == '1') : ?>
-                    <p id="hitokoto">:D 获取中...</p>
-                    <?php endif; ?>
+                    <p id="hitokoto">:D 获取中...</p>                  <?php endif; ?>
                 </div>
                 <?php if ( yjp_option('prev_next_post') == '1') { ?>
                 <?php the_post_navigation( array(

@@ -15,8 +15,7 @@ if ( post_password_required() )
             wp_list_comments( array(
                 'style'       => 'ol',
                 'short_ping'  => true,
-                'avatar_size' => 42,
-                'format'            => 'html5'
+            'callback' => 'comment_format',
             ) );
             ?>
         </ol>
@@ -25,11 +24,12 @@ if ( post_password_required() )
             'next_text' => '下一页',
             'prev_next' => false, 
         ) );?>
-    <?php endif; ?>
-   <?php if (yjp_option('comment_smile') == '1') {  ?> <?php $smile = '<a class="comment-addsmilies" href="javascript:;"><i class="iconfont icon-smile"></i></a><span class="comment-form-smilies">' . alu_get_wpsmiliestrans() . '</span>'; ?><?php } ?>
-    <?php if (yjp_option('comment_img') == '1') {  ?><?php $comment_img ='<a id="comment_add_img"><i class="iconfont icon-photo_upload"></i></a>'; ?><?php } ?>
+    <?php endif; ?> 
+<?php if (yjp_option('comment_smile') == '1') { ?> <?php $smile = '<a class="comment-addsmilies" href="javascript:;"><i class="iconfont icon-smile"></i></a><span class="comment-form-smilies">' . alu_get_wpsmiliestrans() . '</span>'; ?><?php } ?>
+<?php if (yjp_option('comment_img') == '1') { ?><?php $comment_img ='<a id="comment_add_img"><i class="iconfont icon-photo_upload"></i></a>'; ?><?php } ?>
+<?php if (yjp_option('comment_private') == '1') { ?><?php $comment_private ='<span class="comment-span"><input type="checkbox" name="is-private" class="checkbox">私密评论</span>'; ?><?php } ?>
   <?php comment_form(array(  
-    	 'comment_field' => '<p class="comment-form-comment"><label for="comment">' . _x( 'Comment', 'noun' ) . '</label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>'.$comment_img.' '.$smile.'') ); ?>
+    	 'comment_field' => '<p class="comment-form-comment"><label for="comment">' . _x( 'Comment', 'noun' ) . '</label><textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>'.$comment_private.' '.$comment_img.' '.$smile.'') ); ?>
     
     
     

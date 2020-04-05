@@ -19,6 +19,9 @@ remove_action( 'load-themes.php', 'wp_update_themes' );		// 移除后台主题�
 remove_action( 'load-update.php', 'wp_update_themes' );
 remove_action( 'load-update-core.php', 'wp_update_themes' );
 remove_action( 'admin_init', '_maybe_update_themes' );
+//引入主题设置
+define( 'OPTIONS_FRAMEWORK_DIRECTORY', get_template_directory_uri() . '/inc/' );
+require_once dirname( __FILE__ ) . '/inc/options-framework.php';
 //评论图片转换
 define('ALLOW_POSTS', '');
 function fa_comment_image( $comment ) {
@@ -43,12 +46,36 @@ function remove_wpversion($src){
 global $wp_version;
  parse_str(parse_url($src, PHP_URL_QUERY), $query);
  if ( !empty($query['ver']) && $query['ver'] === $wp_version ) {
-$src = str_replace($wp_version, 1.4, $src);
+$src = str_replace($wp_version, 1.5, $src);
   }
  return $src;
 }
 add_filter('script_loader_src', 'remove_wpversion');
 add_filter('style_loader_src', 'remove_wpversion');
+//私密评论
+function fa_private_message_hook( $comment_content , $comment){
+    $comment_ID = $comment->comment_ID;
+    $parent_ID = $comment->comment_parent;
+    $parent_email = get_comment_author_email($parent_ID);
+    $is_private = get_comment_meta($comment_ID,'_private',true);
+    $email = $comment->comment_author_email;
+    $current_commenter = wp_get_current_commenter();
+    if ( $is_private ) $comment_content = '#私密# ' . $comment_content;
+    if ( $current_commenter['comment_author_email'] == $email || $parent_email == $current_commenter['comment_author_email'] || current_user_can('delete_user') ) return $comment_content;
+    if ( $is_private ) return '该评论为私密评论';
+    return $comment_content;
+}
+
+
+if ( yjp_option('comment_private') == '1' && is_singular() ) {
+add_filter('get_comment_text','fa_private_message_hook',10,2);
+}
+function fa_mark_private_message( $comment_id ){
+    if ( $_POST['is-private'] ) {
+        update_comment_meta($comment_id,'_private','true');
+    }
+}
+add_action('comment_post', 'fa_mark_private_message');
 //表情（来自wp-alu插件）
 add_filter('smilies_src', 'alu_smilies_src', 1, 10); 
 function alu_smilies_src($img_src, $img, $siteurl) {
@@ -119,6 +146,15 @@ function alu_smilies_reset() {
     );
 }
 add_action('init','alu_smilies_reset');
+//链接卡片
+function linkcard($atts,$content=null,$code=""){
+    extract(shortcode_atts(array("title"=>'网站标题',"link"=>''),$atts));
+    $return = '<div class="link_card"><a class="link_card_main" href="'.$link.'" ref="nofollow" target="_blank"><span class="link_card_name">'.$title.'</span><span class="link_card_p">';
+    $return .= $content;
+    $return .= '</span><span class="link_card_i" title="前往链接"><i class="iconfont icon-chevron_right"></i></span></a></div>';
+    return $return;
+}
+add_shortcode('link','linkcard');
 //下载按钮
 function download_button($atts,$content=null,$code=""){
     extract(shortcode_atts(array(),$atts));
@@ -174,23 +210,22 @@ function get_post_views($post_id)
 }
 //评论回复邮件通知
 function fanly_comment_mail_notify($comment_id) {
-$mail_name = yjp_option('mail_name') ? yjp_option('mail_name') : 'email'; 
+$mail_name = yjp_option('mail_name'); 
 	$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
 	$comment = get_comment($comment_id);
 	$parent_id = $comment->comment_parent ? $comment->comment_parent : '';
 	$spam_confirmed = $comment->comment_approved;
 	if (($parent_id != '') && ($spam_confirmed != 'spam')) {
-		$wp_email = $mail_name .'@' . preg_replace('#^www\.#', '', strtolower($_SERVER['SERVER_NAME']));
+		$wp_email = $mail_name . '@' . 'email.' . preg_replace('#^www\.#', '', strtolower($_SERVER['SERVER_NAME']));
 		$to = trim(get_comment($parent_id)->comment_author_email);
 		$subject = trim(get_comment($parent_id)->comment_author) . ',您在 [' . $blogname . '] 中的留言有新的回复啦！';
 		$message = '<div style="color:#555;font:12px/1.5 微软雅黑,Tahoma,Helvetica,Arial,sans-serif;max-width:550px;margin:50px auto;border-top: none;" ><table border="0" cellspacing="0" cellpadding="0"><tbody><tr valign="top" height="2"><td valign="top"><div style="background-color:white;max-width:550px;color:#555555;font-family:微软雅黑, Arial;font-size:12px;border: 1px solid rgba(0,0,0,.14);border-radius:10px;">
-<h2 style="border-bottom:1px solid #DDD;text-align:center;font-size:16px;font-weight:normal;padding:8px 0 10px 8px;"><span style="color: #00A7EB;font-weight: bold;"> </span>你在 <a style="text-decoration:none; color:#58B5F5;font-weight:600;" href="' . home_url() . '">' . $blogname . '</a> 的留言有回复啦！</h2><div style="padding:0 12px 0 12px;margin-top:18px">
+<h2 style="border-bottom:1px solid #DDD;text-align:center;font-size:16px;font-weight:normal;padding:8px 0 10px 8px;"><span style="color: #00A7EB;font-weight: bold;"> </span>你在<span style="text-decoration:none; color:#58B5F5;font-weight:600;">' . $blogname . '</span>的留言有回复啦！</h2><div style="padding:0 12px 0 12px;margin-top:18px">
 <p>Hi,' . trim(get_comment($parent_id)->comment_author) . '! 这是你发表在 《' . get_the_title($comment->comment_post_ID) . '》 的评论:</p>
 <p style="background-color: #FAFAE7;padding: 15px;margin: 15px 0;border-radius:6px;">' . nl2br(strip_tags(get_comment($parent_id)->comment_content)) . '</p>
 <p>' . trim($comment->comment_author) . '给你的回复如下:</p>
 <p style="background-color: #FAFAE7;padding: 15px;margin: 15px 0;border-radius:6px;">' . nl2br(strip_tags($comment->comment_content)) . '</p>
-<p>你可以 <a style="text-decoration:none; color:#5692BC" href="' . htmlspecialchars(get_comment_link($parent_id)) . '">查看完整的回复內容</a>，也欢迎再次光临 <a style="text-decoration:none; color:#5692BC"
-href="' . home_url() . '">' . $blogname . '</a>。祝您生活愉快！</p>
+<p>你可以 <a style="text-decoration:none; color:#5692BC" href="' . htmlspecialchars(get_comment_link($parent_id)) . '">查看完整的回复內容</a>,祝您生活愉快！</p>
 <p style="padding-bottom: 15px;color:#F5F171;text-align:center;">此邮件由系统自动发出,请勿直接回复!</p></div></div></td></tr></tbody></table></div>';
 		$from = "From: \"" . get_option('blogname') . "\" <$wp_email>";
 		$headers = "$from\nContent-Type: text/html; charset=" . get_option('blog_charset') . "\n";
@@ -220,9 +255,6 @@ function specs_zan(){
     } 
     die;
 }
-//引入主题设置
-define( 'OPTIONS_FRAMEWORK_DIRECTORY', get_template_directory_uri() . '/inc/' );
-require_once dirname( __FILE__ ) . '/inc/options-framework.php';
 //获得网站头部大图
 function jaguar_get_background_image($post_id = null , $width = null , $height = null){
     if( has_post_thumbnail($post_id) ){
@@ -353,28 +385,44 @@ function xcollapse($atts,$content=null,$code=""){
     return $return;
 }
 add_shortcode('collapse','xcollapse');
-
 //引入js和css
 function jaguar_scripts_styles() {
      if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
             wp_enqueue_script( 'comment-reply' );
         }
-    wp_enqueue_style( 'jaguar', get_template_directory_uri() . '/build/css/app.css', array(), '1.4' );
-    wp_enqueue_style( 'iconfont', get_template_directory_uri() . '/build/css/iconfont.css', array(), '1.4' );
-    if ( is_singular() ) {
+    wp_enqueue_style( 'jaguar', get_template_directory_uri() . '/build/css/app.css', array(), '1.5' );
+    wp_enqueue_style( 'iconfont', get_template_directory_uri() . '/build/css/iconfont.css', array(), '1.5' );
+if ( is_singular() ) {
     wp_enqueue_style( 'highlight', get_template_directory_uri() . '/build/css/highlight.css', array(), '9.15.10' );
  wp_enqueue_script( 'highlight' , get_template_directory_uri() . '/build/js/highlight.min.js' , array() , '9.15.10' ,true);
-    }
+}
+if ( is_singular() && yjp_option('share') == '1' ) {
  wp_enqueue_script( 'qrcode' , get_template_directory_uri() . '/build/js/qrcode.min.js' , array() , '' ,true);
+}
  wp_enqueue_script( 'jaguar_jquery' , get_template_directory_uri() . '/build/js/jquery.min.js' , array() , '3.4.1' ,true);
-    wp_enqueue_script( 'jaguar' , get_template_directory_uri() . '/build/js/application.js' , array('jquery') , '1.4' ,true);
+    wp_enqueue_script( 'jaguar' , get_template_directory_uri() . '/build/js/application.js' , array('jquery') , '1.5' ,true);
+$singular = is_singular();
+$comment_img = yjp_option('comment_img') ? '1' : '0';
+$hitokoto = yjp_option('hitokoto') ? '1' : '0';
+$qrcode = yjp_option('share') ? '1' : '0';
+$singular_post_open = is_singular('post');
+$comment_open = comments_open();
+$is_home = is_home();
+
    wp_localize_script( 'jaguar', 'J', array(
             'ajax_url'   => admin_url('admin-ajax.php'),
             'order' => get_option('comment_order'),
-            'formpostion' => 'bottom', 
+            'formpostion' => 'bottom',
+         'singular_open' => $singular,
+'hitokoto' => $hitokoto,
+'qrcode' => $qrcode,
+'singular_post_open' => $singular_post_open,
+'comment_open' => $comment_open,
+'comment_img' => $comment_img,
+'is_home' => $is_home,
+
         ) );
     if ( is_singular() && has_post_thumbnail() ) {
-
         global $post;
         $timthumb_src = wp_get_attachment_image_src(get_post_thumbnail_id($post_id),'full');
         $output = $timthumb_src[0];
@@ -382,17 +430,37 @@ function jaguar_scripts_styles() {
                 .banner-mask{
                         background-image:url(" . $output . ");
                 }";
-       
  wp_add_inline_style( 'jaguar', $custom_css );
     }
-
 }
-
 add_action( 'wp_enqueue_scripts', 'jaguar_scripts_styles' );
-
-
-
-
+//评论回调
+function comment_format($comment, $args, $depth)
+{
+    $GLOBALS['comment'] = $comment; ?>
+    <li class="comment" id="comment-<?php comment_ID(); ?>">
+<article id="div-comment-<?php comment_ID(); ?>" class="comment-body">
+ <footer class="comment-meta">
+ <div class="comment-author vcard">
+<?php echo get_avatar( $comment, $size = '40')?>
+  <b class="fn">
+      <?php echo get_comment_author_link();?>
+      </b>
+<?php if(user_can($comment->user_id, "update_core")){echo '<span class="comment-admin">'.__('博主','yjp').'</span>';}?>
+      <span class="says">说道：</span> 
+     </div>
+      <div class="comment-metadata">
+ <time><?php echo get_comment_date(); ?></time>
+ </div>
+ </footer>
+ <div class="comment-content">
+ <p><?php comment_text(); ?></p>
+ </div>
+ <div class="reply"><?php comment_reply_link(array_merge($args, array('reply_text' => '回复', 'depth' => $depth, 'max_depth' => $args['max_depth']))) ?>
+</div> </article>
+ </li>
+    <?php
+}
 //ajax评论发表
     function fa_ajax_comment_callback(){
         $comment = wp_handle_comment_submission( wp_unslash( $_POST ) );

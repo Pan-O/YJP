@@ -1,29 +1,23 @@
         </div>
         <footer class="site-footer clearfix u-textAlignCenter">
             <P>Theme：<a href="https://panjianhao.top/" target="_blank">YJP</a></P>
-            <?php if ( yjp_option('web_run_time') == '1') { ?><P><?php echo yjp_option('web_name'); ?>已经存活<span id="run_time"></span></P>
-            <script>function runTime() {
-    var d = new Date(), str = '';
-    BirthDay = new Date("<?php echo yjp_option('build_time'); ?>");
-    today = new Date();
-    timeold = (today.getTime() - BirthDay.getTime());
-    sectimeold = timeold / 1000
-    secondsold = Math.floor(sectimeold);
-    msPerDay = 24 * 60 * 60 * 1000
-    msPerYear = 365 * 24 * 60 * 60 * 1000
-    e_daysold = timeold / msPerDay
-    e_yearsold = timeold / msPerYear
-    daysold = Math.floor(e_daysold);
-    yearsold = Math.floor(e_yearsold);
-    str += daysold + "天";
-    str += d.getHours() + '时';
-    str += d.getMinutes() + '分';
-    str += d.getSeconds() + '秒';
-    return str;
-}
-setInterval(function () {
-    $('#run_time').html(runTime())
-}, 1000);</script><?php } ?>
+            <?php if ( yjp_option('web_run_time') == '1') { ?><p id="run_time"></p>
+            <script>function runtime(){
+        X = new Date("<?php echo yjp_option('build_time'); ?>");
+        Y = new Date();
+        T = (Y.getTime()-X.getTime());
+        M = 24*60*60*1000;
+        a = T/M;
+        A = Math.floor(a);
+        b = (a-A)*24;
+        B = Math.floor(b);
+        c = (b-B)*60;
+        C = Math.floor((b-B)*60);
+        D = Math.floor((c-C)*60);
+        run_time.innerHTML = "<?php echo yjp_option('web_name'); ?>已经存活"+A+"天"+B+"小时"+C+"分"+D+"秒"
+    }
+    setInterval(runtime, 1000);
+</script><?php } ?>
 <?php echo yjp_option('footer_main'); ?>
         </footer>
     </div>

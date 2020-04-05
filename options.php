@@ -232,7 +232,13 @@ function optionsframework_options() {
         'type' => 'checkbox'
     );
 
-
+$options[] = array(
+        'name' => __('私密评论', 'theme-textdomain'),
+        'desc' => __('默认关闭，勾选开启', 'theme-textdomain'),
+        'id' => 'comment_private',
+        'std' => '0',
+        'type' => 'checkbox'
+    );
 
     $options[] = array(
 		'name' => __( '社交', 'theme-textdomain' ),
@@ -333,7 +339,7 @@ function optionsframework_options() {
 	
 	$options[] = array(
 		'name' => __('邮箱地址前缀', 'theme-textdomain'),
-		'desc' => __('用于发送系统邮件，在用户的邮箱中显示的发件人地址，默认为email', 'theme-textdomain'),
+		'desc' => __('用于发送系统邮件，在用户的邮箱中显示的发件人地址', 'theme-textdomain'),
 		'id' => 'mail_name',
 		'type' => 'text'
 	);
@@ -348,7 +354,7 @@ function optionsframework_options() {
     
     	$options[] = array(
 		'name' => __('网站运行时间', 'theme-textdomain'),
-		'desc' => __('填写建站时间，格式“年-月-日”', 'theme-textdomain'),
+		'desc' => __('填写建站时间，格式“月/日/年”', 'theme-textdomain'),
 		'id' => 'build_time',
 		'type' => 'text'
 	);

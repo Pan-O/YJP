@@ -1,11 +1,36 @@
 //一言
-   fetch('https://v1.hitokoto.cn')
+if (J.hitokoto == '1' && J.is_home ){
+fetch('https://v1.hitokoto.cn')
     .then(response => response.json())
     .then(data => {
-      const hitokoto = document.getElementById('hitokoto');
-      hitokoto.innerText = data.hitokoto;
+      const hitokoto = document.getElementById('hitokoto')
+      hitokoto.innerText = data.hitokoto
     })
-    .catch(err => console.error(err));
+    .catch(console.error)
+} else if  (J.hitokoto == '1' && J.singular_post_open ){
+fetch('https://v1.hitokoto.cn')
+    .then(response => response.json())
+    .then(data => {
+      const hitokoto = document.getElementById('hitokoto')
+      hitokoto.innerText = data.hitokoto
+    })
+    .catch(console.error)
+} 
+//上传图片
+if (J.singular_open && J.comment_open && J.comment_img == '1'){
+var textarea = document.getElementById('comment')
+var button = document.getElementById('comment_add_img')
+button.addEventListener('click', () => {
+  var value = textarea.value.split('')
+  var pos = textarea.selectionStart
+  var img = prompt("输入图片链接","");
+  var insertValue = img
+  value.splice(pos, 0, insertValue)
+  textarea.value = value.join('')
+  textarea.selectionStart = textarea.selectionEnd = pos + insertValue.length
+  textarea.focus()
+}, false)
+}
 //ajax评论发表
 jQuery(document).ready(function(jQuery) {
 	var __cancel = jQuery('#cancel-comment-reply-link'),
@@ -76,18 +101,9 @@ jQuery(document).ready(function(jQuery) {
 		}
 	};
 });
-
-
-
-
-
-
-
-
 /**
  消息提示组件
 **/
-
 $.extend({
   message: function(options) {
       var defaults={
@@ -97,14 +113,12 @@ $.extend({
           autoClose:true,
           onClose:function(){}
       };
-      
       if(typeof options === 'string'){
           defaults.message=options;
       }
       if(typeof options === 'object'){
           defaults=$.extend({},defaults,options);
       }
-      //message模版
       var template='<div class="c-message messageFadeInDown">'+
           '<div class="c-message--main">' +
             '<div class="c-message--tip">'+defaults.message+'</div>'+
@@ -115,31 +129,25 @@ $.extend({
       var $message=$(template);
       var timer;
       var closeFn,removeFn;
-      //关闭
       closeFn=function(){
           $message.addClass('messageFadeOutUp');
           $message.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend',function(){
               removeFn();
           })
       };
-      //移除
       removeFn=function(){
           $message.remove();
           defaults.onClose(defaults);
           clearTimeout(timer);
       };
-      //移除所有
       $('.c-message').remove();
       $body.append($message);
-      //居中
       $message.css({
           'margin-left':'-'+$message.width()/2+'px'
       })
-      //去除动画类
       $message.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend',function(){
           $message.removeClass('messageFadeInDown');
       });
-      //自动关闭
       if(defaults.autoClose){
           timer=setTimeout(function(){
               closeFn();
@@ -147,7 +155,6 @@ $.extend({
       }
   }
 });
-
 //夜间模式
 function NightMode(){
     var night = document.cookie.replace(/(?:(?:^|.*;\s*)night\s*\=\s*([^;]*).*$)|^.*$/, "$1") || '0';
@@ -161,21 +168,6 @@ function NightMode(){
 		$.message('夜间模式关闭');
     }
 }
-//评论图片
-$(function(){
-var commentaddimgtextarea=document.getElementById('comment')
-var commentaddimg=document.getElementById('comment_add_img')
-commentaddimg.addEventListener('click', () => {
-  var value = commentaddimgtextarea.value.split('')
-  var pos = commentaddimgtextarea.selectionStart
-  var img = prompt("输入图片链接","");
-  var insertValue = img
-  value.splice(pos, 0, insertValue)
-  commentaddimgtextarea.value = value.join('')
-  commentaddimgtextarea.selectionStart = commentaddimgtextarea.selectionEnd = pos + insertValue.length
-  commentaddimgtextarea.focus()
-}, false)
-});
 //表情（来自wp-alu插件）
 document.addEventListener('DOMContentLoaded', function(){
    var aluContainer = document.querySelector('.comment-form-smilies');
@@ -266,8 +258,6 @@ function(){
                 }
             });
         });
-
-
 //点赞
 $.fn.postLike = function() {
 	if ($(this).hasClass('done')) {
@@ -295,8 +285,6 @@ $(document).on("click", ".specsZan",
 	function() {
 		$(this).postLike();
 });
-//代码高亮
-hljs.initHighlightingOnLoad();
 //展开 / 收缩功能
 (function() {
 	$(function(){
@@ -312,6 +300,10 @@ hljs.initHighlightingOnLoad();
 		});
 	});
 }());
+//代码高亮
+if (J.singular_open){
+hljs.initHighlightingOnLoad();
+}
 //返回顶部
 $(function(){
         $(window).on("scroll", function() {
@@ -324,6 +316,7 @@ $(function(){
 	});
 });
 //二维码
+if (J.qrcode == '1' && J.singular_post_open){
 $(function(){
 	var home = window.location.href;
 var qrcode = new QRCode("wechat_share_qrcode", {
@@ -335,3 +328,4 @@ var qrcode = new QRCode("wechat_share_qrcode", {
 	correctLevel : QRCode.CorrectLevel.H
 });
 });
+}
