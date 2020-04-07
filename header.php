@@ -10,7 +10,7 @@
     <meta name="Description" Content="<?php echo yjp_option('meta_description'); ?>">
     <?php wp_head(); ?>
     <style>
-    .banner-mask{background-image: url(<?php echo yjp_option('home_banner'); ?>)}
+    .banner-mask{background-image: url(<?php echo jaguar_is_has_image(get_the_ID());?>)}
 .cute,.post-like,#submit:hover,#pagination a:hover,.mask-wrapper .post-title:hover,.comment .fn,.comment-form .required,.comment-at,.post-navigation .nav-next a:hover .post-title,.post-navigation .nav-previous a:hover .post-title ,.share_button i{color: <?php echo yjp_option('theme_color'); ?>}
 #submit:hover {border-color: <?php echo yjp_option('theme_color'); ?>;}
 .loading span,.nav-links .page-numbers.current,.nav-links .page-numbers:hover,.comment-body .reply .comment-reply-link,.checkbox::after,.comment-admin,.download_button,.searchform input[type=submit] {background-color: <?php echo yjp_option('theme_color'); ?>}

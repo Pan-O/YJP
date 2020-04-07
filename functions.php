@@ -1,24 +1,4 @@
 <?php
-//禁止自动更新
-add_filter('automatic_updater_disabled', '__return_true');	// 彻底关闭自动更新
-
-remove_action('init', 'wp_schedule_update_checks');	// 关闭更新检查定时作业
-wp_clear_scheduled_hook('wp_version_check');			// 移除已有的版本检查定时作业
-wp_clear_scheduled_hook('wp_update_plugins');		// 移除已有的插件更新定时作业
-wp_clear_scheduled_hook('wp_update_themes');			// 移除已有的主题更新定时作业
-wp_clear_scheduled_hook('wp_maybe_auto_update');		// 移除已有的自动更新定时作业
-
-remove_action( 'admin_init', '_maybe_update_core' );		// 移除后台内核更新检查
-
-remove_action( 'load-plugins.php', 'wp_update_plugins' );	// 移除后台插件更新检查
-remove_action( 'load-update.php', 'wp_update_plugins' );
-remove_action( 'load-update-core.php', 'wp_update_plugins' );
-remove_action( 'admin_init', '_maybe_update_plugins' );
-
-remove_action( 'load-themes.php', 'wp_update_themes' );		// 移除后台主题更新检查
-remove_action( 'load-update.php', 'wp_update_themes' );
-remove_action( 'load-update-core.php', 'wp_update_themes' );
-remove_action( 'admin_init', '_maybe_update_themes' );
 //引入主题设置
 define( 'OPTIONS_FRAMEWORK_DIRECTORY', get_template_directory_uri() . '/inc/' );
 require_once dirname( __FILE__ ) . '/inc/options-framework.php';
@@ -46,7 +26,7 @@ function remove_wpversion($src){
 global $wp_version;
  parse_str(parse_url($src, PHP_URL_QUERY), $query);
  if ( !empty($query['ver']) && $query['ver'] === $wp_version ) {
-$src = str_replace($wp_version, 1.5, $src);
+$src = str_replace($wp_version, 1.6, $src);
   }
  return $src;
 }
@@ -65,11 +45,7 @@ function fa_private_message_hook( $comment_content , $comment){
     if ( $is_private ) return '该评论为私密评论';
     return $comment_content;
 }
-
-
-if ( yjp_option('comment_private') == '1' && is_singular() ) {
 add_filter('get_comment_text','fa_private_message_hook',10,2);
-}
 function fa_mark_private_message( $comment_id ){
     if ( $_POST['is-private'] ) {
         update_comment_meta($comment_id,'_private','true');
@@ -275,21 +251,16 @@ function jaguar_get_background_image($post_id = null , $width = null , $height =
 }
 //获得文章图片
 function jaguar_is_has_image($post_id){
-    static $has_image;
-    global $post;
-    if( has_post_thumbnail($post_id) ){
-        $has_image = true;
-    } else {
-        $content = get_post_field('post_content', $post_id);
-        preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $content, $strResult, PREG_PATTERN_ORDER);
-        $n = count($strResult[1]);
-        if($n > 0){
-            $has_image = true;
-        } else {
-            $has_image = false;
-        }
-    }
-    return $has_image;
+  static $has_image;
+ global $post;
+ if( is_singular() && has_post_thumbnail($post_id) ){
+ $post_image_url = wp_get_attachment_image_src( get_post_thumbnail_id($post->ID), 'full');
+$has_image = $post_image_url[0];
+ } else {
+$banner_img = yjp_option('home_banner');
+$has_image = $banner_img;
+}
+ return $has_image;
 }
 //杂项
 function jaguar_setup() {
@@ -326,6 +297,66 @@ function jaguar_recover_comment_fields($comment_fields){
     return $comment_fields;
 }
 add_filter('comment_form_fields','jaguar_recover_comment_fields');
+//展开 / 收缩功能
+function xcollapse($atts,$content=null,$code=""){
+    extract(shortcode_atts(array("title"=>'标题内容'),$atts));
+    $return = '<div class="xControl"><div class="xHeading"><div class="xIcon"><i class="iconfont icon-plus"></i></div><h5>';
+    $return .= $title;
+    $return .= '</h5></div><div class="xContent"><div class="inner">';
+    $return .= $content;
+    $return .= '</div></div></div>';
+    return $return;
+}
+add_shortcode('collapse','xcollapse');
+//引入js和css
+function jaguar_scripts_styles() {
+     if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
+            wp_enqueue_script( 'comment-reply' );
+        }
+    wp_enqueue_style( 'jaguar', get_template_directory_uri() . '/build/css/app.css', array(), '1.6' );
+    wp_enqueue_style( 'iconfont', get_template_directory_uri() . '/build/css/iconfont.css', array(), '1.6' );
+if ( is_singular() ) {
+    wp_enqueue_style( 'highlight', get_template_directory_uri() . '/build/css/highlight.css', array(), '9.15.10' );
+ wp_enqueue_script( 'highlight' , get_template_directory_uri() . '/build/js/highlight.min.js' , array() , '9.15.10' ,true);
+}
+if ( is_singular() && yjp_option('share') == '1' ) {
+ wp_enqueue_script( 'qrcode' , get_template_directory_uri() . '/build/js/qrcode.min.js' , array() , '' ,true);
+}
+ wp_enqueue_script( 'jaguar_jquery' , get_template_directory_uri() . '/build/js/jquery.min.js' , array() , '3.4.1' ,true);
+    wp_enqueue_script( 'jaguar' , get_template_directory_uri() . '/build/js/application.js' , array('jquery') , '1.6' ,true);
+$singular = is_singular();
+$comment_img = yjp_option('comment_img') ? '1' : '0';
+$hitokoto = yjp_option('hitokoto') ? '1' : '0';
+$qrcode = yjp_option('share') ? '1' : '0';
+$singular_post_open = is_singular('post');
+$comment_open = comments_open();
+$is_home = is_home();
+
+   wp_localize_script( 'jaguar', 'J', array(
+            'ajax_url'   => admin_url('admin-ajax.php'),
+            'order' => get_option('comment_order'),
+            'formpostion' => 'bottom',
+         'singular_open' => $singular,
+'hitokoto' => $hitokoto,
+'qrcode' => $qrcode,
+'singular_post_open' => $singular_post_open,
+'comment_open' => $comment_open,
+'comment_img' => $comment_img,
+'is_home' => $is_home,
+
+        ) );
+    if ( is_singular() && has_post_thumbnail() ) {
+        global $post;
+        $timthumb_src = wp_get_attachment_image_src(get_post_thumbnail_id($post_id),'full');
+        $output = $timthumb_src[0];
+        $custom_css = "
+                .banner-mask{
+                        background-image:url(" . $output . ");
+                }";
+ wp_add_inline_style( 'jaguar', $custom_css );
+    }
+}
+add_action( 'wp_enqueue_scripts', 'jaguar_scripts_styles' );
 //上下篇文章图片
 function jaguar_post_nav_background() {
     if ( ! is_single() ) {
@@ -374,66 +405,6 @@ function jaguar_post_nav_background() {
     wp_add_inline_style( 'jaguar', $css );
 }
 add_action( 'wp_enqueue_scripts', 'jaguar_post_nav_background' );
-//展开 / 收缩功能
-function xcollapse($atts,$content=null,$code=""){
-    extract(shortcode_atts(array("title"=>'标题内容'),$atts));
-    $return = '<div class="xControl"><div class="xHeading"><div class="xIcon"><i class="iconfont icon-plus"></i></div><h5>';
-    $return .= $title;
-    $return .= '</h5></div><div class="xContent"><div class="inner">';
-    $return .= $content;
-    $return .= '</div></div></div>';
-    return $return;
-}
-add_shortcode('collapse','xcollapse');
-//引入js和css
-function jaguar_scripts_styles() {
-     if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
-            wp_enqueue_script( 'comment-reply' );
-        }
-    wp_enqueue_style( 'jaguar', get_template_directory_uri() . '/build/css/app.css', array(), '1.5' );
-    wp_enqueue_style( 'iconfont', get_template_directory_uri() . '/build/css/iconfont.css', array(), '1.5' );
-if ( is_singular() ) {
-    wp_enqueue_style( 'highlight', get_template_directory_uri() . '/build/css/highlight.css', array(), '9.15.10' );
- wp_enqueue_script( 'highlight' , get_template_directory_uri() . '/build/js/highlight.min.js' , array() , '9.15.10' ,true);
-}
-if ( is_singular() && yjp_option('share') == '1' ) {
- wp_enqueue_script( 'qrcode' , get_template_directory_uri() . '/build/js/qrcode.min.js' , array() , '' ,true);
-}
- wp_enqueue_script( 'jaguar_jquery' , get_template_directory_uri() . '/build/js/jquery.min.js' , array() , '3.4.1' ,true);
-    wp_enqueue_script( 'jaguar' , get_template_directory_uri() . '/build/js/application.js' , array('jquery') , '1.5' ,true);
-$singular = is_singular();
-$comment_img = yjp_option('comment_img') ? '1' : '0';
-$hitokoto = yjp_option('hitokoto') ? '1' : '0';
-$qrcode = yjp_option('share') ? '1' : '0';
-$singular_post_open = is_singular('post');
-$comment_open = comments_open();
-$is_home = is_home();
-
-   wp_localize_script( 'jaguar', 'J', array(
-            'ajax_url'   => admin_url('admin-ajax.php'),
-            'order' => get_option('comment_order'),
-            'formpostion' => 'bottom',
-         'singular_open' => $singular,
-'hitokoto' => $hitokoto,
-'qrcode' => $qrcode,
-'singular_post_open' => $singular_post_open,
-'comment_open' => $comment_open,
-'comment_img' => $comment_img,
-'is_home' => $is_home,
-
-        ) );
-    if ( is_singular() && has_post_thumbnail() ) {
-        global $post;
-        $timthumb_src = wp_get_attachment_image_src(get_post_thumbnail_id($post_id),'full');
-        $output = $timthumb_src[0];
-        $custom_css = "
-                .banner-mask{
-                        background-image:url(" . $output . ");
-                }";
- wp_add_inline_style( 'jaguar', $custom_css );
-    }
-}
-add_action( 'wp_enqueue_scripts', 'jaguar_scripts_styles' );
 //评论回调
 function comment_format($comment, $args, $depth)
 {
