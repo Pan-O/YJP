@@ -241,7 +241,7 @@ $options[] = array(
     );
 
     $options[] = array(
-		'name' => __( '社交', 'theme-textdomain' ),
+		'name' => __( '链接', 'theme-textdomain' ),
 		'type' => 'heading'
 	);
 	
@@ -331,6 +331,13 @@ $options[] = array(
 		'id' => 'link_email',
 		'type' => 'text'
 	);
+
+	$options[] = array(
+		'name' => __('Github', 'theme-textdomain'),
+		'desc' => __('填写你的github链接', 'theme-textdomain'),
+		'id' => 'github_link',
+		'type' => 'text'
+	);
 	
     	$options[] = array(
 		'name' => __( '其他设置', 'theme-textdomain' ),
@@ -359,5 +366,29 @@ $options[] = array(
 		'type' => 'text'
 	);
 	
+		$options[] = array(
+        'name' => __('图片放大', 'theme-textdomain'),
+        'desc' => __('默认关闭，勾选开启', 'theme-textdomain'),
+        'id' => 'zooming',
+        'std' => '0',
+        'type' => 'checkbox'
+    );
+
+    $options[] = array(
+        'name' => __('图片懒加载(Beta)', 'theme-textdomain'),
+        'desc' => __('默认关闭，勾选开启', 'theme-textdomain'),
+        'id' => 'lazyload',
+        'std' => '0',
+        'type' => 'checkbox'
+    );
+
+	$options[] = array(
+        'name' => __('菜单折叠', 'theme-textdomain'),
+        'desc' => __('默认关闭，勾选开启', 'theme-textdomain'),
+        'id' => 'menu',
+        'std' => '0',
+        'type' => 'checkbox'
+    );
+
 	return $options;
 }

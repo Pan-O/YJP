@@ -1,5 +1,5 @@
 <article class="post-item">
-<div class="post-image" style="background-image: url(<?php echo jaguar_get_background_image(get_the_ID(),740,340);?>);">
+<?php if ( yjp_option('lazyload') == '0') : ?><div class="post-image" style="background-image: url(<?php echo jaguar_get_background_image(get_the_ID(),740,340);?>);"><?php elseif ( yjp_option('lazyload') == '1') : ?><div class="post-image lazyload" style="background-image: url(data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=)" data-src="<?php echo jaguar_get_background_image(get_the_ID(),740,340);?>"><?php endif; ?>
         <div class="info-mask">
             <div class="mask-wrapper">
                 <h2 class="post-title">

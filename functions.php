@@ -17,6 +17,27 @@ function fa_comment_image( $comment ) {
     return $comment;
 }
 add_filter('preprocess_comment', 'fa_comment_image');
+//图片懒加载
+if ( yjp_option('lazyload') == '1' ) {
+function lazyload($content) {
+    $image = "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=";
+    $imgsrc = '/<img(.+)src=[\'"]([^\'"]+)[\'"](.*)>/i';
+    $replace = "<img class=\"lazyload\" src=\"$image\" data-src=\"\$2\" \$3>";
+    $content = preg_replace($imgsrc, $replace, $content);
+  return $content;
+}
+add_filter('the_content', 'lazyload');
+}
+//禁止英文评论
+function wp_refused_spam_comments($comment_data) {
+$pattern = '/[一-龥]/u';
+if (!preg_match($pattern, $comment_data['comment_content'])) {
+	echo "<script>$.message('不能发表纯英文评论哦！'); </script>";
+    err();
+}
+return ($comment_data);
+}
+add_filter('preprocess_comment', 'wp_refused_spam_comments');
 // 去除WP版本号
 function remove_wp_version(){
   return '';
@@ -26,7 +47,7 @@ function remove_wpversion($src){
 global $wp_version;
  parse_str(parse_url($src, PHP_URL_QUERY), $query);
  if ( !empty($query['ver']) && $query['ver'] === $wp_version ) {
-$src = str_replace($wp_version, 1.6, $src);
+$src = str_replace($wp_version, 1.8, $src);
   }
  return $src;
 }
@@ -124,15 +145,53 @@ function alu_smilies_reset() {
 add_action('init','alu_smilies_reset');
 //链接卡片
 function linkcard($atts,$content=null,$code=""){
-    extract(shortcode_atts(array("title"=>'网站标题',"link"=>''),$atts));
-    $return = '<div class="link_card"><a class="link_card_main" href="'.$link.'" ref="nofollow" target="_blank"><span class="link_card_name">'.$title.'</span><span class="link_card_p">';
-    $return .= $content;
-    $return .= '</span><span class="link_card_i" title="前往链接"><i class="iconfont icon-chevron_right"></i></span></a></div>';
+    extract(shortcode_atts(array("title"=>'网站标题',"image"=>''. get_template_directory_uri() .'/build/img/link.png'),$atts));
+	$tempu=parse_url($content);
+    $url=$tempu['host'];
+    $return = '<div class="link_card"><a class="link_card_main" href="'.$content.'" ref="nofollow" target="_blank"><span class="link-card-content"><span class="link_card_name">'.$title.'</span><span class="link_card_link"><i class="iconfont icon-link"></i>';
+    $return .= $url;
+    $return .= '</span></span>';
+	$return .= '<span class="link-card-image"><span class="link-card-img" style="background-image:url('.$image.')"></span></span>';
+	$return .= '</a></div>';
     return $return;
 }
 add_shortcode('link','linkcard');
+//评论卡片
+function fa_insert_comments( $atts, $content = null ){
+    extract( shortcode_atts( array(
+        'ids' => ''
+    ),$atts ) );
+    $content     = '';
+    $comment_ids = explode(',', $ids);
+    $query_args  = array('comment__in'=>$comment_ids,);
+    $fa_comments = get_comments($query_args);
+    if ( empty($fa_comments) ) return;
+    foreach ($fa_comments as $key => $fa_comment) {
+        $content .= '<div class="comment-card"><span class="comment-card-avatar">' . get_avatar($fa_comment->comment_author_email,40) . '</span><b class="comment-card-author">' . $fa_comment->comment_author . '</b><div class="comment-card-date">' . $fa_comment->comment_date .'</div><div class="comment-card-text">'.  $fa_comment->comment_content . '</div></div>';
+    }
+    return $content;
+}
+add_shortcode('insert_comments', 'fa_insert_comments');
+//文章卡片
+function fa_insert_posts( $atts, $content = null ){
+    extract( shortcode_atts( array(
+        'ids' => ''
+    ),
+        $atts ) );
+    global $post;
+    $content = '';
+    $postids =  explode(',', $ids);
+    $inset_posts = get_posts(array('post__in'=>$postids));
+    foreach ($inset_posts as $key => $post) {
+        setup_postdata( $post );
+        $content .=  '<div class="post-card"><a target="_blank" class="post-card-main" href="' . get_permalink() . '"><span class="post-card-title">' . get_the_title() . '</span><span class="post-card-content">'.wp_trim_words( get_the_excerpt(), 60, '...' ).'</span></a><a target="_blank" class="post-card-image" href="' . get_permalink() . '" style="background-image:url('.jaguar_get_background_image(get_the_ID(),740,340).')"></a></a></div>';
+    }
+    wp_reset_postdata();
+    return $content;
+}
+add_shortcode('insert_post', 'fa_insert_posts');
 //下载按钮
-function download_button($atts,$content=null,$code=""){
+function download_button($atts,$content=null){
     extract(shortcode_atts(array(),$atts));
     $return .= '<span class="download_button"><a href="'.$content.'">';
     $return .= '<i class="iconfont icon-download"></i>Download';
@@ -141,7 +200,7 @@ function download_button($atts,$content=null,$code=""){
 }
 add_shortcode('download','download_button');
 //代码高亮
-function highlight_code($atts,$content=null,$code=""){
+function highlight_code($atts,$content=null){
     extract(shortcode_atts(array(),$atts));
     $return .= '<pre><code>';
     $return .= $content;
@@ -313,8 +372,8 @@ function jaguar_scripts_styles() {
      if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
             wp_enqueue_script( 'comment-reply' );
         }
-    wp_enqueue_style( 'jaguar', get_template_directory_uri() . '/build/css/app.css', array(), '1.6' );
-    wp_enqueue_style( 'iconfont', get_template_directory_uri() . '/build/css/iconfont.css', array(), '1.6' );
+    wp_enqueue_style( 'jaguar', get_template_directory_uri() . '/build/css/app.css', array(), '1.8' );
+    wp_enqueue_style( 'iconfont', get_template_directory_uri() . '/build/css/iconfont.css', array(), '1.8' );
 if ( is_singular() ) {
     wp_enqueue_style( 'highlight', get_template_directory_uri() . '/build/css/highlight.css', array(), '9.15.10' );
  wp_enqueue_script( 'highlight' , get_template_directory_uri() . '/build/js/highlight.min.js' , array() , '9.15.10' ,true);
@@ -322,8 +381,14 @@ if ( is_singular() ) {
 if ( is_singular() && yjp_option('share') == '1' ) {
  wp_enqueue_script( 'qrcode' , get_template_directory_uri() . '/build/js/qrcode.min.js' , array() , '' ,true);
 }
+if ( is_singular() && yjp_option('zooming') == '1' ) {
+ wp_enqueue_script( 'zooming' , get_template_directory_uri() . '/build/js/zooming.js' , array() , '2.1.1' ,true);
+}
+if ( yjp_option('lazyload') == '1' ) {
+wp_enqueue_script( 'lazyload' , get_template_directory_uri() . '/build/js/lazyload.js' , array() , '2.0.0' ,true);
+}
  wp_enqueue_script( 'jaguar_jquery' , get_template_directory_uri() . '/build/js/jquery.min.js' , array() , '3.4.1' ,true);
-    wp_enqueue_script( 'jaguar' , get_template_directory_uri() . '/build/js/application.js' , array('jquery') , '1.6' ,true);
+    wp_enqueue_script( 'jaguar' , get_template_directory_uri() . '/build/js/application.js' , array('jquery') , '1.8' ,true);
 $singular = is_singular();
 $comment_img = yjp_option('comment_img') ? '1' : '0';
 $hitokoto = yjp_option('hitokoto') ? '1' : '0';
@@ -331,19 +396,23 @@ $qrcode = yjp_option('share') ? '1' : '0';
 $singular_post_open = is_singular('post');
 $comment_open = comments_open();
 $is_home = is_home();
-
+$zooming = yjp_option('zooming') ? '1' : '0';
+$lazyload = yjp_option('lazyload') ? '1' : '0';
+$menu = yjp_option('menu') ? '1' : '0';
    wp_localize_script( 'jaguar', 'J', array(
             'ajax_url'   => admin_url('admin-ajax.php'),
             'order' => get_option('comment_order'),
             'formpostion' => 'bottom',
-         'singular_open' => $singular,
-'hitokoto' => $hitokoto,
-'qrcode' => $qrcode,
-'singular_post_open' => $singular_post_open,
-'comment_open' => $comment_open,
-'comment_img' => $comment_img,
-'is_home' => $is_home,
-
+            'singular_open' => $singular,
+            'hitokoto' => $hitokoto,
+            'qrcode' => $qrcode,
+            'singular_post_open' => $singular_post_open,
+            'comment_open' => $comment_open,
+            'comment_img' => $comment_img,
+            'is_home' => $is_home,
+            'zooming' => $zooming,
+            'lazyload' => $lazyload,
+	        'menu' => $menu,
         ) );
     if ( is_singular() && has_post_thumbnail() ) {
         global $post;

@@ -1,6 +1,6 @@
         </div>
         <footer class="site-footer clearfix u-textAlignCenter">
-            <P>Theme：<a href="https://panjianhao.top/" target="_blank">YJP</a></P>
+            <P>Theme：<a href="https://github.com/coolapk-Panjianhao/YJP" target="_blank">YJP</a></P>
             <?php if ( yjp_option('web_run_time') == '1') { ?><p id="run_time"></p>
             <script>function runtime(){
         X = new Date("<?php echo yjp_option('build_time'); ?>");

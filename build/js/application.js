@@ -223,6 +223,7 @@ function(){
                         nextHref = $(data).find("#pagination a").attr("href");
                         $(".main-content").append(result.fadeIn(500));
                         $("#pagination a").removeClass("loading").text("下一页");
+						if (J.lazyload == '1'){ lazyload(); }
                         if ( nextHref != undefined ) {
                             $("#pagination a").attr("href", nextHref);
                         } else {
@@ -303,6 +304,30 @@ $(document).on("click", ".specsZan",
 //代码高亮
 if (J.singular_open){
 hljs.initHighlightingOnLoad();
+}
+//图片放大
+if (J.singular_open && J.zooming == '1'){
+document.addEventListener('DOMContentLoaded', function () {
+new Zooming({
+  bgColor:'rgba(0,0,0,.6)'
+  }).listen('.single-post-inner img')
+})
+}
+//图片懒加载
+if (J.lazyload == '1'){
+lazyload();
+}
+//菜单
+if (J.menu == '1'){
+$('#menu-button').on('click', function () {
+                if ($('#menu-button').hasClass('show-menu')){
+                    $('#menu-button').removeClass('show-menu').addClass('hide-menu');
+                    $('.nav-header .nav-header-container #menu').addClass('menu');
+                }else{
+                    $('#menu-button').removeClass('hide-menu').addClass('show-menu');
+                    $('.nav-header .nav-header-container #menu').removeClass('menu');
+                }
+            });
 }
 //返回顶部
 $(function(){
