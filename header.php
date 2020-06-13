@@ -13,7 +13,8 @@
     .banner-mask{background-image: url(<?php echo jaguar_is_has_image(get_the_ID());?>)}
 .cute,.post-like,#submit:hover,#pagination a:hover,.mask-wrapper .post-title:hover,.comment .fn,.comment-form .required,.comment-at,.post-navigation .nav-next a:hover .post-title,.post-navigation .nav-previous a:hover .post-title ,.share_button i,.comment-card-author{color: <?php echo yjp_option('theme_color'); ?>}
 #submit:hover {border-color: <?php echo yjp_option('theme_color'); ?>;}
-.loading span,.nav-links .page-numbers.current,.nav-links .page-numbers:hover,.comment-body .reply .comment-reply-link,.checkbox::after,.comment-admin,.download_button,.searchform input[type=submit] {background-color: <?php echo yjp_option('theme_color'); ?>}
+.loading span,.nav-links .page-numbers.current,.nav-links .page-numbers:hover,.comment-body .reply .comment-reply-link,.checkbox::after,.comment-admin,.download_button,.searchform input[type=submit] ,
+::-webkit-scrollbar-thumb{background-color: <?php echo yjp_option('theme_color'); ?>}
 #pagination a:hover{border:2px solid <?php echo yjp_option('theme_color'); ?>;}
 .searchform input[type=submit],.checkbox {border: 1px solid <?php echo yjp_option('theme_color'); ?>;}
 <?php if ( yjp_option('menu') == '1') { ?>.nav-header-container div{display: inline-block;}.nav-header-container div:last-child{display:none;}<?php } ?>
